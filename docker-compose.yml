@@ -1,0 +1,24 @@
+services:
+  mysqldb:                                  # ce nom est celui de l'url JDBC (jdbc:mysql://mysqldb:3306/...)
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root             # identique à spring.datasource.password
+      MYSQL_DATABASE: postshare             # identique au nom de base dans l'url
+    ports:
+      - "3306:3306"
+    volumes:
+      - db:/var/lib/mysql                   # les données survivent à "docker compose down"
+
+  app-postshare:
+    depends_on:
+      - mysqldb                             # MySQL démarre avant l'application
+    image: faatyy/postshare-backend:1.0.0   # l'image que tu viens de construire
+    restart: on-failure                     # relance si Spring démarre avant que MySQL soit prêt
+    ports:
+      - "8082:8080"                         # hôte:conteneur (8080 est pris par Jenkins)
+    stdin_open: true
+    tty: true
+
+volumes:
+  db:

@@ -1,0 +1,5 @@
+/DigiCertGlobalRootCA.crt.pem
+/keystore.jks
+**/.vscode/target/
+node_modules/
+.angular/
