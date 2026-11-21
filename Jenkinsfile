@@ -2,18 +2,19 @@ pipeline {
   agent any
 
   options {
-    skipDefaultCheckout(true)      // on fait nous-mêmes le checkout dans le stage "Git"
+    skipDefaultCheckout(true)
   }
 
   environment {
-    IMAGE = 'faatyy/postshare-backend:1.0.0'
+    BACK_IMAGE  = 'faatyy/postshare-backend:1.0.0'
+    FRONT_IMAGE = 'faatyy/postshare-frontend:1.0.0'
   }
 
   stages {
 
     stage('Git') {
       steps {
-        checkout scm               // récupère le code depuis GitHub
+        checkout scm
       }
     }
 
@@ -28,7 +29,10 @@ pipeline {
     stage('Docker image') {
       steps {
         dir('backend') {
-          sh 'docker build -t $IMAGE .'
+          sh 'docker build -t $BACK_IMAGE .'
+        }
+        dir('frontend') {
+          sh 'docker build -t $FRONT_IMAGE .'
         }
       }
     }
@@ -38,7 +42,8 @@ pipeline {
         withCredentials([usernamePassword(credentialsId: 'dockerhub',
             usernameVariable: 'DH_USER', passwordVariable: 'DH_TOKEN')]) {
           sh 'echo "$DH_TOKEN" | docker login -u "$DH_USER" --password-stdin'
-          sh 'docker push $IMAGE'
+          sh 'docker push $BACK_IMAGE'
+          sh 'docker push $FRONT_IMAGE'
         }
       }
     }
