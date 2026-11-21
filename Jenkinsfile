@@ -1,11 +1,21 @@
 pipeline {
   agent any
 
+  options {
+    skipDefaultCheckout(true)      // on fait nous-mêmes le checkout dans le stage "Git"
+  }
+
   environment {
     IMAGE = 'faatyy/postshare-backend:1.0.0'
   }
 
   stages {
+
+    stage('Git') {
+      steps {
+        checkout scm               // récupère le code depuis GitHub
+      }
+    }
 
     stage('Maven build') {
       steps {
@@ -15,7 +25,7 @@ pipeline {
       }
     }
 
-    stage('Docker build') {
+    stage('Docker image') {
       steps {
         dir('backend') {
           sh 'docker build -t $IMAGE .'
@@ -23,7 +33,7 @@ pipeline {
       }
     }
 
-    stage('Docker push') {
+    stage('Docker Hub') {
       steps {
         withCredentials([usernamePassword(credentialsId: 'dockerhub',
             usernameVariable: 'DH_USER', passwordVariable: 'DH_TOKEN')]) {
@@ -33,7 +43,7 @@ pipeline {
       }
     }
 
-    stage('Docker compose') {
+    stage('Docker-compose') {
       steps {
         sh 'docker compose up -d'
       }
