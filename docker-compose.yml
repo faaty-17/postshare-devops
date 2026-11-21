@@ -20,5 +20,14 @@ services:
     stdin_open: true
     tty: true
 
+  frontend:
+    image: faatyy/postshare-frontend:1.0.0
+    depends_on:
+      - app-postshare
+    restart: unless-stopped
+    ports:
+      - "4200:80"
+
 volumes:
   db:
+  
